@@ -22,6 +22,7 @@ import base64
 import json
 
 import websockets
+from websockets.exceptions import ConnectionClosed, InvalidStatus
 
 OWNER = "http://localhost:8200/echo-test"
 
@@ -35,7 +36,13 @@ async def main() -> None:
     ws_url = args.base_url.replace("http", "ws") + f"/voice/stream?owner={args.owner}"
     total_bytes = 0
     try:
-        async with websockets.connect(ws_url, max_size=None) as ws:
+        try:
+            connect = websockets.connect(ws_url, max_size=None)
+        except OSError as exc:
+            print(f"cannot reach the bridge at {args.base_url} ({exc})\n"
+                  "is it running?  ./.venv/Scripts/python -m voice_bridge.main")
+            return
+        async with connect as ws:
             print("stream attached — hold the button on the /ptt page and speak; "
                   "you should hear an echo on release")
             async for raw in ws:
@@ -48,6 +55,12 @@ async def main() -> None:
                     await ws.send(pcm)  # echo back: full-duplex proof
     except (KeyboardInterrupt, asyncio.CancelledError):
         pass
+    except (InvalidStatus, ConnectionClosed) as exc:
+        print(f"stream refused: {exc}\n"
+              "another consumer already holds the one stream slot — check for a\n"
+              "stray echo/consumer process (or a second terminal) and stop it,\n"
+              "then retry. Only one stream may be attached at a time.")
+        return
     finally:
         print(f"audio bytes received: {total_bytes or '(none)'}")
 

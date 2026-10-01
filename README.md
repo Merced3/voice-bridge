@@ -56,10 +56,18 @@ the lifecycle: single-instance lock, supervision with restart, graceful
 shutdown, structured logs, and `data/status.json`.
 
 ```bash
-pip install -e ../automation-harness   # not on PyPI; install from sibling
-pip install -e .
-cp .env.example .env                   # set VOICE_BRIDGE_TOKEN
-python -m voice_bridge.main
+python -m venv .venv                 # like every sibling repo, deps live in .venv
+./.venv/Scripts/pip install -e ../automation-harness   # not on PyPI; install from sibling
+./.venv/Scripts/pip install -e ".[dev]"
+cp .env.example .env                 # set VOICE_BRIDGE_TOKEN
+```
+
+Then, always with the venv's interpreter:
+
+```bash
+./.venv/Scripts/python -m voice_bridge.main        # run the bridge
+./.venv/Scripts/python -m unittest discover -s tests -v
+./.venv/Scripts/python scripts/echo_voice_live.py  # live echo check
 ```
 
 Off-LAN access (phone away from home) is via Tailscale, never a public
@@ -67,16 +75,23 @@ tunnel.
 
 ## Live verification
 
-With the bridge running on the LAN:
+Three moving parts, all at once:
 
-```bash
-pip install -e ".[dev]"
-python scripts/echo_voice_live.py
-```
+1. **The bridge** (terminal 1, leave running):
+   `./.venv/Scripts/python -m voice_bridge.main`
+2. **The echo consumer** (terminal 2) — a stand-in *client* that attaches
+   to the running bridge and echoes audio back; it does nothing on its
+   own: `./.venv/Scripts/python scripts/echo_voice_live.py`
+   (you should see `stream attached — …`)
+3. **The phone page** — open `http://<lan-ip>:8200/ptt?token=…`
 
-Then open the `/ptt` page on a phone, hold the button, speak, release —
-you should hear yourself, with press/release events in the logs. That
-echo is the full-duplex proof.
+Then hold the button, speak, release — you should hear yourself, with
+press/release events in the logs. That echo is the full-duplex proof.
+
+If the echo script is refused immediately ("stream refused"), another
+consumer already holds the one stream slot — usually a stray
+echo/consumer process from an earlier run. Stop it (or restart the
+bridge) and retry; only one stream may be attached at a time.
 
 ## Tests
 
