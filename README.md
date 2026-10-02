@@ -42,8 +42,10 @@ The bridge runs on the local machine and exposes a small HTTP/WS API
   speaking events toward the consumer, binary PCM back for playback
   (mirrors discord-hub's Stage-2 stream)
 
-The owner opens `http://<host>:8200/ptt?token=...` on a phone, holds the
-button, and talks; the consuming project receives exact press/release
+The owner opens the `/ptt` page on a phone (HTTPS required for the mic —
+`tailscale serve --bg 8200`, then `https://<pc>.<tailnet>.ts.net/ptt?token=...`;
+browsers block `getUserMedia` on plain-HTTP LAN URLs), picks push-to-talk
+or voice-activity mode, and talks; the consuming project receives exact press/release
 turn boundaries and the audio between them, and streams its reply back.
 
 See `docs/api.md` for the full contract, `docs/architecture.md` for how it

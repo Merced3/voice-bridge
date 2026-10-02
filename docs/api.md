@@ -43,12 +43,30 @@ button-driven turn boundary is currently available.
 
 ## Page surface (not for consumers)
 
-- `GET /ptt` — the hold-to-talk page. Open as
-  `http://<host>:8200/ptt?token=<token>` on a phone.
+- `GET /ptt` — the phone page. Open as
+  `https://<host>/ptt?token=<token>` (via `tailscale serve`, see below).
+  Two input modes, switchable on the page: **push-to-talk** (hold the
+  button) and **voice activity** (open mic; a level gate in the page
+  opens on speech and closes after ~0.8 s of quiet). Both POST the same
+  down/up edges, so consumers cannot tell the modes apart. A live ring
+  around the button lights when the gate is open AND the mic hears you
+  (meter, gate, and display are decoupled).
 - `POST /voice/ptt` — `{"state": "down"|"up", "token": ...}` → 204 / 400 / 403.
 - `POST /voice/ptt/heartbeat` — `{"token": ...}` → 204 / 403.
 - `WS /voice/page/audio?token=...` — the page's duplex audio socket:
-  binary s16le 48 kHz mono each way (mic gated by the hold).
+  binary s16le 48 kHz mono each way (mic gated by the hold/gate).
+
+**HTTPS is required for the mic.** `getUserMedia` is blocked in insecure
+contexts, so `http://<lan-ip>:8200/ptt` loads but the mic never works
+(iOS Safari especially). Serve over HTTPS instead:
+
+```
+tailscale serve --bg 8200
+# then open https://<pc>.<tailnet>.ts.net/ptt?token=<token> on the phone
+```
+
+This also gives off-LAN access for free, per the cross-project rule
+(Tailscale, never public tunnels).
 
 Consumers never call these; they are documented here so the token surface
 is auditable in one place.
