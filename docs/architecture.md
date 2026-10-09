@@ -85,3 +85,28 @@ Long-running concerns — single-instance lock, graceful shutdown,
 structured JSON logs, and a `status.json` snapshot — are provided by
 embedding the owner's **automation-harness** as a dependency (the same
 pattern as discord-hub). The bridge implements none of that itself.
+
+## Field notes (2026-10-09, first in-car lessons)
+
+Learnings from real use that shape what consumers must do — noted here
+because this doc is where transport policy is decided:
+
+- **Transport choice must be a live, per-session command, not env config
+  + restart.** The driving case wants discord-hub (its iOS app owns
+  Bluetooth routing, background audio, Opus, and Krisp noise
+  suppression); the desk case wants this bridge (exact turn boundaries,
+  own UI). The owner decides per situation, often away from the machine
+  that would need the restart. Today `TEACHING_AGENT_VOICE_TRANSPORT`
+  is load-time config — teaching-agent follow-up.
+- **Consumers should re-attach after a bridge restart, not end the
+  session.** The bridge closes consumer streams with 1012 (service
+  restart) on shutdown; teaching-agent currently logs the reader death
+  and ends the voice session. The page already auto-reconnects, so a
+  consumer that re-attached with backoff would make bridge restarts
+  invisible mid-lesson. Consumer-side change; bridge contract already
+  supports it.
+- **iPhone + Safari + cellular + car Bluetooth is the worst-case
+  environment for the page.** The page now carries a jitter buffer, WS
+  auto-reconnect, wake lock, and mic/speaker pickers, but Safari limits
+  remain (no setSinkId, aggressive background suspension) — hence the
+  per-situation transport split above rather than more page hardening.
