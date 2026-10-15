@@ -4,7 +4,7 @@
 
 ## Why this exists (the thesis)
 
-Some projects need live voice conversations with the owner — the Teaching
+Some projects need live voice conversations with the owner â€” the Teaching
 Agent holds spoken tutoring sessions, and more will come. The first
 transport was Discord voice via discord-hub, but Discord voice receive for
 bots is unsanctioned reverse-engineering: it broke twice in three days
@@ -25,7 +25,7 @@ consumers pick per situation.
 conversations.**
 
 PCM/audio in, audio out, press/release and speaking events. No STT, no
-TTS, no LLM, no notion of a "learner" or a "session" — the brain is what
+TTS, no LLM, no notion of a "learner" or a "session" â€” the brain is what
 makes a consuming project *that* agent, and it lives in the consumer.
 Consumers stay web-agnostic: they never see a websocket frame, only the
 same duplex-stream contract discord-hub exposes (`/voice/stream`), so
@@ -36,13 +36,13 @@ swapping transports is a config change, not a rewrite.
 The bridge runs on the local machine and exposes a small HTTP/WS API
 (`0.0.0.0:8200` by default, token-gated):
 
-- `GET /ptt` — the phone page: hold-to-talk button, heartbeat presence,
+- `GET /ptt` â€” the phone page: hold-to-talk button, heartbeat presence,
   live mic/speaker audio
-- `WS /voice/stream?owner=...` — the consumer contract: per-speaker PCM +
+- `WS /voice/stream?owner=...` â€” the consumer contract: per-speaker PCM +
   speaking events toward the consumer, binary PCM back for playback
   (mirrors discord-hub's Stage-2 stream)
 
-The owner opens the `/ptt` page on a phone (HTTPS required for the mic �
+The owner opens the `/ptt` page on a phone (HTTPS required for the mic —
 `tailscale serve --bg 8200`, then `https://<pc>.<tailnet>.ts.net/ptt?token=...`;
 browsers block `getUserMedia` on plain-HTTP LAN URLs), picks push-to-talk
 or voice-activity mode, and talks; the consuming project receives exact press/release
@@ -81,17 +81,17 @@ Three moving parts, all at once:
 
 1. **The bridge** (terminal 1, leave running):
    `./.venv/Scripts/python -m voice_bridge.main`
-2. **The echo consumer** (terminal 2) — a stand-in *client* that attaches
+2. **The echo consumer** (terminal 2) â€” a stand-in *client* that attaches
    to the running bridge and echoes audio back; it does nothing on its
    own: `./.venv/Scripts/python scripts/echo_voice_live.py`
-   (you should see `stream attached — …`)
-3. **The phone page** — open `http://<lan-ip>:8200/ptt?token=…`
+   (you should see `stream attached â€” â€¦`)
+3. **The phone page** â€” open `http://<lan-ip>:8200/ptt?token=â€¦`
 
-Then hold the button, speak, release — you should hear yourself, with
+Then hold the button, speak, release â€” you should hear yourself, with
 press/release events in the logs. That echo is the full-duplex proof.
 
 If the echo script is refused immediately ("stream refused"), another
-consumer already holds the one stream slot — usually a stray
+consumer already holds the one stream slot â€” usually a stray
 echo/consumer process from an earlier run. Stop it (or restart the
 bridge) and retry; only one stream may be attached at a time.
 

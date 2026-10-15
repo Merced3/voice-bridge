@@ -1,6 +1,5 @@
 """RemotePTT semantics: heartbeat presence, exact press/release edges."""
 
-import time
 import unittest
 from unittest.mock import patch
 

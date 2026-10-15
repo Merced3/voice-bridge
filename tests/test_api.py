@@ -3,6 +3,7 @@
 import unittest
 
 from fastapi.testclient import TestClient
+from starlette.websockets import WebSocketDisconnect
 
 from voice_bridge.api import create_api
 from voice_bridge.room import Room
@@ -74,33 +75,41 @@ class SurfaceTests(unittest.TestCase):
 class WebsocketTests(unittest.TestCase):
     def test_page_audio_rejected_without_token(self):
         client = make_client()
-        with self.assertRaises(Exception):
-            with client.websocket_connect("/voice/page/audio?token=wrong"):
-                pass
+        with (
+            self.assertRaises(WebSocketDisconnect),
+            client.websocket_connect("/voice/page/audio?token=wrong"),
+        ):
+            pass
 
     def test_stream_requires_owner(self):
         client = make_client()
-        with self.assertRaises(Exception):
-            with client.websocket_connect("/voice/stream"):
-                pass
+        with (
+            self.assertRaises(WebSocketDisconnect),
+            client.websocket_connect("/voice/stream"),
+        ):
+            pass
 
     def test_second_stream_refused(self):
         client = make_client()
-        with client.websocket_connect("/voice/stream?owner=a"):
-            with self.assertRaises(Exception):
-                with client.websocket_connect("/voice/stream?owner=b"):
-                    pass
+        with (
+            client.websocket_connect("/voice/stream?owner=a"),
+            self.assertRaises(WebSocketDisconnect),
+            client.websocket_connect("/voice/stream?owner=b"),
+        ):
+            pass
 
     def test_full_duplex_over_websockets(self):
         """Page mic → consumer event; consumer PCM → page playback."""
         client = make_client()
-        with client.websocket_connect("/voice/stream?owner=a") as stream:
-            with client.websocket_connect(f"/voice/page/audio?token={TOKEN}") as page:
-                page.send_bytes(b"\x01\x00\x02\x00")  # two mono samples
-                event = stream.receive_json()
-                self.assertEqual(event["type"], "audio")
-                stream.send_bytes(b"\x05\x00\x05\x00")  # one stereo frame
-                self.assertEqual(page.receive_bytes(), b"\x05\x00")
+        with (
+            client.websocket_connect("/voice/stream?owner=a") as stream,
+            client.websocket_connect(f"/voice/page/audio?token={TOKEN}") as page,
+        ):
+            page.send_bytes(b"\x01\x00\x02\x00")  # two mono samples
+            event = stream.receive_json()
+            self.assertEqual(event["type"], "audio")
+            stream.send_bytes(b"\x05\x00\x05\x00")  # one stereo frame
+            self.assertEqual(page.receive_bytes(), b"\x05\x00")
 
 
 if __name__ == "__main__":

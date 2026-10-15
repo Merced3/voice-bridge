@@ -4,7 +4,7 @@ import asyncio
 import base64
 import unittest
 
-from voice_bridge.room import Room, StreamTakenError, _QUEUE_MAX
+from voice_bridge.room import _QUEUE_MAX, Room, StreamTakenError
 
 
 def run(coro):

@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import contextlib
 import logging
 import time
 
@@ -40,14 +41,10 @@ class StreamTakenError(RuntimeError):
 
 def _put_drop_oldest(queue: asyncio.Queue, item) -> None:
     if queue.full():
-        try:
+        with contextlib.suppress(asyncio.QueueEmpty):
             queue.get_nowait()
-        except asyncio.QueueEmpty:
-            pass
-    try:
+    with contextlib.suppress(asyncio.QueueFull):
         queue.put_nowait(item)
-    except asyncio.QueueFull:
-        pass
 
 
 class ConsumerStream:
@@ -76,12 +73,14 @@ class ConsumerStream:
             _put_drop_oldest(self.events, event)
 
     def emit_audio(self, pcm_stereo: bytes) -> None:
-        self._emit({
-            "type": "audio",
-            "user_id": PAGE_USER_ID,
-            "pcm": base64.b64encode(pcm_stereo).decode("ascii"),
-            "timestamp": time.time(),
-        })
+        self._emit(
+            {
+                "type": "audio",
+                "user_id": PAGE_USER_ID,
+                "pcm": base64.b64encode(pcm_stereo).decode("ascii"),
+                "timestamp": time.time(),
+            }
+        )
 
     def emit_speaking(self, state: str) -> None:
         self._emit({"type": "speaking", "user_id": PAGE_USER_ID, "state": state})
@@ -105,9 +104,7 @@ class Room:
         """Attach the one allowed consumer stream to the room."""
         async with self._lock:
             if self._stream is not None and not self._stream.closed:
-                raise StreamTakenError(
-                    f"a stream is already attached (owner {self._stream.owner})"
-                )
+                raise StreamTakenError(f"a stream is already attached (owner {self._stream.owner})")
             self._stream = ConsumerStream(owner)
             logger.info("consumer stream attached (owner %s)", owner)
             return self._stream

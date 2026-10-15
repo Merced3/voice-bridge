@@ -39,12 +39,16 @@ async def main() -> None:
         try:
             connect = websockets.connect(ws_url, max_size=None)
         except OSError as exc:
-            print(f"cannot reach the bridge at {args.base_url} ({exc})\n"
-                  "is it running?  ./.venv/Scripts/python -m voice_bridge.main")
+            print(
+                f"cannot reach the bridge at {args.base_url} ({exc})\n"
+                "is it running?  ./.venv/Scripts/python -m voice_bridge.main"
+            )
             return
         async with connect as ws:
-            print("stream attached — hold the button on the /ptt page and speak; "
-                  "you should hear an echo on release")
+            print(
+                "stream attached — hold the button on the /ptt page and speak; "
+                "you should hear an echo on release"
+            )
             async for raw in ws:
                 event = json.loads(raw)
                 if event["type"] == "speaking":
@@ -56,10 +60,12 @@ async def main() -> None:
     except (KeyboardInterrupt, asyncio.CancelledError):
         pass
     except (InvalidStatus, ConnectionClosed) as exc:
-        print(f"stream refused: {exc}\n"
-              "another consumer already holds the one stream slot — check for a\n"
-              "stray echo/consumer process (or a second terminal) and stop it,\n"
-              "then retry. Only one stream may be attached at a time.")
+        print(
+            f"stream refused: {exc}\n"
+            "another consumer already holds the one stream slot — check for a\n"
+            "stray echo/consumer process (or a second terminal) and stop it,\n"
+            "then retry. Only one stream may be attached at a time."
+        )
         return
     finally:
         print(f"audio bytes received: {total_bytes or '(none)'}")
