@@ -6,4 +6,7 @@ on:
 
 jobs:
   checks:
-    uses: Merced3/automations/.github/workflows/python-checks.yml@main
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo inline-works
