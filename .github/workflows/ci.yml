@@ -1,5 +1,3 @@
-# CI — calls the shared checklist defined once in Merced3/automations
-# (.github/workflows/python-checks.yml). Change it there, not here.
 name: CI
 
 on:
@@ -9,5 +7,3 @@ on:
 jobs:
   checks:
     uses: Merced3/automations/.github/workflows/python-checks.yml@main
-    secrets:
-      AUTOMATIONS_PAT: ${{ secrets.AUTOMATIONS_PAT }}
