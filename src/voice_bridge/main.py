@@ -41,7 +41,6 @@ async def bridge_service(ctx: ServiceContext) -> None:
 
 
 def main() -> None:
-    raise RuntimeError("ROLLBACK DRILL 2026-10-15: deliberate broken deploy, do not fix by hand")
     harness = Harness(HarnessConfig(data_dir="data"), name="voice-bridge")
     harness.add_service("bridge", bridge_service)
     harness.run()  # async runtime: harness owns the event loop
