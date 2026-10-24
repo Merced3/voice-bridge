@@ -22,6 +22,7 @@ from typing import Any
 from fastapi import FastAPI, Request, Response, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 
+from .boot import BOOT_TOKEN
 from .page import PTT_PAGE
 from .room import Room, StreamTakenError
 
@@ -43,6 +44,10 @@ def create_api(room: Room, *, token: str = "", started_at: float | None = None) 
     @app.get("/health")
     async def health() -> dict[str, Any]:
         return {"status": "ok", "uptime_s": round(time.time() - started, 1), **room.status()}
+
+    @app.get("/boot-check")
+    async def boot_check() -> dict[str, str]:
+        return {"boot_token": BOOT_TOKEN}
 
     @app.get("/version")
     async def version() -> dict[str, str]:
