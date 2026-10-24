@@ -16,6 +16,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
+from importlib.metadata import version as pkg_version
 from typing import Any
 
 from fastapi import FastAPI, Request, Response, WebSocket, WebSocketDisconnect
@@ -42,6 +43,10 @@ def create_api(room: Room, *, token: str = "", started_at: float | None = None) 
     @app.get("/health")
     async def health() -> dict[str, Any]:
         return {"status": "ok", "uptime_s": round(time.time() - started, 1), **room.status()}
+
+    @app.get("/version")
+    async def version() -> dict[str, str]:
+        return {"version": pkg_version("voice-bridge")}
 
     @app.get("/ptt", response_class=HTMLResponse)
     async def ptt_page() -> HTMLResponse:

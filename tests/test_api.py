@@ -114,3 +114,25 @@ class WebsocketTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class VersionRouteTests(unittest.TestCase):
+    def test_version_returns_200_with_version_field(self):
+        client = make_client()
+        resp = client.get("/version")
+        self.assertEqual(resp.status_code, 200)
+        version = resp.json().get("version")
+        self.assertIsInstance(version, str)
+        self.assertTrue(version)
+
+    def test_version_matches_installed_package_metadata(self):
+        from importlib.metadata import version as pkg_version
+
+        client = make_client()
+        resp = client.get("/version")
+        self.assertEqual(resp.json()["version"], pkg_version("voice-bridge"))
+
+    def test_version_needs_no_token(self):
+        client = make_client()  # token configured, none supplied on request
+        resp = client.get("/version")
+        self.assertEqual(resp.status_code, 200)
