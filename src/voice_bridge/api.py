@@ -9,6 +9,9 @@
   discord-hub's Stage-2 stream: JSON audio/speaking events toward the
   consumer (pcm = base64 s16le 48 kHz stereo), binary PCM back for
   playback. One stream at a time; a second attach is refused.
+- ``GET /boot-check`` — boot diagnostic: 200 when the boot-time
+  ``VOICE_BRIDGE_BOOT_TOKEN`` was set, 503 when unset; the service always
+  starts (fail-loud, not fail-dead) so a deploy gate can enforce it.
 """
 
 from __future__ import annotations
