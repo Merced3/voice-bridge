@@ -21,15 +21,17 @@ from importlib.metadata import version as pkg_version
 from typing import Any
 
 from fastapi import FastAPI, Request, Response, WebSocket, WebSocketDisconnect
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 
 from .page import PTT_PAGE
 from .room import Room, StreamTakenError
 
-# Boot-time diagnostic token, captured fail-fast at import: the app MUST
-# crash here (KeyError) if the variable is unset, and GET /boot-check
+# Boot-time diagnostic token, captured at import so GET /boot-check
 # reports the value the process booted with even if the env changes later.
-BOOT_TOKEN = os.environ["VOICE_BRIDGE_BOOT_TOKEN"]
+# Fail-LOUD, not fail-dead: the service always starts without it (two
+# production rollbacks came from crashing here); /boot-check answers 503
+# when the token is unset so a deploy gate can still enforce it.
+BOOT_TOKEN = os.environ.get("VOICE_BRIDGE_BOOT_TOKEN", "")
 
 logger = logging.getLogger(__name__)
 
@@ -51,8 +53,10 @@ def create_api(room: Room, *, token: str = "", started_at: float | None = None) 
         return {"status": "ok", "uptime_s": round(time.time() - started, 1), **room.status()}
 
     @app.get("/boot-check")
-    async def boot_check() -> dict[str, str]:
-        return {"boot_token": BOOT_TOKEN}
+    async def boot_check() -> Response:
+        if not BOOT_TOKEN:
+            return Response(status_code=503)
+        return JSONResponse({"boot_token": BOOT_TOKEN})
 
     @app.get("/version")
     async def version() -> dict[str, str]:

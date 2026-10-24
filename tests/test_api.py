@@ -1,11 +1,6 @@
 """HTTP surface: token gating, PTT routes, health. Offline (TestClient)."""
 
-import os
 import unittest
-
-# voice_bridge.api reads VOICE_BRIDGE_BOOT_TOKEN at import time (fail-fast),
-# so it must be set before the module is first imported.
-os.environ.setdefault("VOICE_BRIDGE_BOOT_TOKEN", "test-boot-token")
 
 from fastapi.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
