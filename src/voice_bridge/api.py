@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import time
 from importlib.metadata import version as pkg_version
 from typing import Any
@@ -22,9 +23,13 @@ from typing import Any
 from fastapi import FastAPI, Request, Response, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 
-from .boot import BOOT_TOKEN
 from .page import PTT_PAGE
 from .room import Room, StreamTakenError
+
+# Boot-time diagnostic token, captured fail-fast at import: the app MUST
+# crash here (KeyError) if the variable is unset, and GET /boot-check
+# reports the value the process booted with even if the env changes later.
+BOOT_TOKEN = os.environ["VOICE_BRIDGE_BOOT_TOKEN"]
 
 logger = logging.getLogger(__name__)
 

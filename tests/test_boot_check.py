@@ -68,9 +68,8 @@ class FailFastTests(unittest.TestCase):
     def test_missing_env_var_crashes_at_import(self):
         env = os.environ.copy()
         env.pop("VOICE_BRIDGE_BOOT_TOKEN", None)
-        with patch.dict(os.environ, env, clear=True):
-            with self.assertRaises(KeyError):
-                importlib.reload(api_module)
+        with patch.dict(os.environ, env, clear=True), self.assertRaises(KeyError):
+            importlib.reload(api_module)
 
 
 if __name__ == "__main__":
