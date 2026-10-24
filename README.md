@@ -64,6 +64,12 @@ python -m venv .venv                 # like every sibling repo, deps live in .ve
 cp .env.example .env                 # set VOICE_BRIDGE_TOKEN
 ```
 
+`VOICE_BRIDGE_BOOT_TOKEN` is **required**: the process crashes at import
+(KeyError) without it — that fail-fast is deliberate (it caused a deploy
+rollback once when the deploy environment lacked it). Set it in every
+environment before deploying; `GET /boot-check` reports the value the
+process booted with.
+
 Then, always with the venv's interpreter:
 
 ```bash
