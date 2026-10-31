@@ -1,0 +1,7 @@
+# The owner must review changes to the transport boundary and deploy/access safety.
+/CORE-CONSTRAINTS.md @Merced3
+/.github/ @Merced3
+/docs/decisions/ @Merced3
+/docs/api.md @Merced3
+/src/ @Merced3
+/pyproject.toml @Merced3
