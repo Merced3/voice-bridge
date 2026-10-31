@@ -64,6 +64,14 @@ class SurfaceTests(unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertIn("Hold to talk", resp.text)
 
+    def test_root_serves_the_page(self):
+        # A saved home-screen link to the bare root must land on the page,
+        # not a 404 — from a phone the two are indistinguishable.
+        client = make_client()
+        resp = client.get("/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("Hold to talk", resp.text)
+
     def test_health_reports_room_status(self):
         client = make_client()
         body = client.get("/health").json()

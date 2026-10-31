@@ -81,6 +81,38 @@ Then, always with the venv's interpreter:
 Off-LAN access (phone away from home) is via Tailscale, never a public
 tunnel.
 
+## Is it down? (runbook)
+
+**Symptom:** the page is a white screen, or the proxy in front answers
+`502 Bad Gateway`. From a phone, a white screen almost always means the
+page never loaded — it is not a frontend rendering bug.
+
+**Check the service first** (on the host, default port 8200):
+
+```bash
+curl -sS http://localhost:8200/health
+```
+
+- `{"status": "ok", ...}` → the bridge is up; look at the layer in front
+  (Tailscale serve config, phone-side Tailscale connection).
+- Connection refused → the bridge process is not running.
+- `502` from the public URL with the above refused → confirmed: the app
+  is down and the proxy is just reporting it.
+
+**Why it stays down silently:** the harness restarts the bridge when the
+bridge crashes *while the harness is alive*, but nothing restarts the
+harness itself — a host reboot, an OOM kill, or a killed harness process
+leaves everything dead until someone starts it again. Supervision always
+comes from one level up: run the bridge under systemd with
+`Restart=always` (the automation-harness repo ships the template/docs
+for this) so reboots self-heal.
+
+**Health checks must not lie:** an external monitor may only report
+healthy on an HTTP 200 from `/health` whose body contains
+`"status": "ok"`. Connection refused, timeouts, 5xx, or a body without
+that field are all unhealthy — a proxy that answers 502 is not a healthy
+bridge.
+
 ## Live verification
 
 Three moving parts, all at once:

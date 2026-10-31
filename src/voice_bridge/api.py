@@ -1,6 +1,8 @@
 """The FastAPI app: the phone page, the PTT routes, and two websockets.
 
-- ``GET /ptt`` — the hold-to-talk page (browser/phone).
+- ``GET /ptt`` — the hold-to-talk page (browser/phone). Also served at
+  ``GET /`` so a saved link to the bare root never lands on a bare 404
+  (which looks identical to an outage from a phone).
 - ``POST /voice/ptt`` + ``POST /voice/ptt/heartbeat`` — press/release and
   presence, token-gated (moved here from teaching-agent, agnostic).
 - ``WS /voice/page/audio?token=`` — the page's duplex audio: binary s16le
@@ -65,6 +67,7 @@ def create_api(room: Room, *, token: str = "", started_at: float | None = None) 
     async def version() -> dict[str, str]:
         return {"version": pkg_version("voice-bridge")}
 
+    @app.get("/", response_class=HTMLResponse)
     @app.get("/ptt", response_class=HTMLResponse)
     async def ptt_page() -> HTMLResponse:
         return HTMLResponse(PTT_PAGE)
