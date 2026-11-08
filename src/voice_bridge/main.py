@@ -41,7 +41,7 @@ async def bridge_service(ctx: ServiceContext) -> None:
 
 
 def main() -> None:
-    harness = Harness(HarnessConfig(data_dir="data"), name="voice-bridge")
+    harness = Harness(HarnessConfig.from_env(), name="voice-bridge")
     harness.add_service("bridge", bridge_service)
     harness.run()  # async runtime: harness owns the event loop
 
