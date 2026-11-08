@@ -63,6 +63,15 @@ Read `../PRINCIPLES.md` first — the cross-project rules apply here.
 - `tests/` — offline `unittest` suites; run with
   `python -m unittest discover -s tests -v`
 
+## Testing and live acceptance
+
+Keep the default suite offline and use this repo's echo/browser procedure for
+transport-level live checks. When integrated acceptance through a consuming
+project also needs a Discord lab channel, follow **`Automations/ops/LAB.md`**
+for generic registration lifecycle and hub-network readiness. The consumer
+still owns its application configuration; voice-bridge gains no Discord or
+conversation lifecycle policy.
+
 ## Repository boundaries
 
 Only edit voice-bridge in this session. The sibling repos (discord-hub,

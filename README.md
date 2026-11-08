@@ -140,3 +140,9 @@ Offline, no live services:
 ```bash
 python -m unittest discover -s tests -v
 ```
+
+Use the echo/browser procedure above for transport-level live verification. If
+an integrated consuming-project test also needs a Discord lab channel, follow
+**`Automations/ops/LAB.md`** for channel claim/check/release and protected
+registration history. The consumer supplies its own application configuration;
+voice-bridge remains transport-only.
