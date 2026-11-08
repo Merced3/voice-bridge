@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Transport-only voice channel over a phone/browser web page for all projects"
 requires-python = ">=3.13"
 dependencies = [
-    "automation-harness>=0.5.0,<0.6",
+    "automation-harness[postgres]>=0.5.0,<0.6",
     "fastapi>=0.115",
     "uvicorn>=0.30",
     "pydantic-settings>=2.5",
