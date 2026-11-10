@@ -13,6 +13,12 @@ class HarnessDependencyTests(unittest.TestCase):
             pyproject["project"]["dependencies"],
         )
 
+    def test_websockets_is_a_runtime_dependency(self):
+        """Uvicorn rejects real upgrades with 404 when this is dev-only."""
+        pyproject = tomllib.loads((Path(__file__).parents[1] / "pyproject.toml").read_text())
+        self.assertIn("websockets>=12", pyproject["project"]["dependencies"])
+        self.assertNotIn("websockets>=12", pyproject["project"]["optional-dependencies"]["dev"])
+
 
 if __name__ == "__main__":
     unittest.main()
